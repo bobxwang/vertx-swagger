@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="300">
+    <properties>
+        <property name="LOG_HOME">/data/logs/apps/vert-x</property>
+        <property name="PATTERN">[%d{MMdd HH:mm:ss.SSS} %-5level] [%t] [%X{_TRACE_ID}] [%X{_USER_ID}] %c{3}:%L %msg%n
+        </property>
+    </properties>
+
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${PATTERN}"/>
+        </Console>
+
+        <RollingRandomAccessFile name="file_log" fileName="${LOG_HOME}/vertx.log"
+                                 filePattern="${LOG_HOME}/vertx_file-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingRandomAccessFile>
+
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="file_log"/>
+        </Root>
+    </Loggers>
+</Configuration>

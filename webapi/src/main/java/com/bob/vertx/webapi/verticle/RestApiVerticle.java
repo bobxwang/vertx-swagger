@@ -41,6 +41,11 @@ public class RestApiVerticle extends AbstractVerticle {
 
     private void configRoute(final Router router) {
 
+        router.get("/logout").handler(context -> {
+            context.clearUser();
+            context.response().setStatusCode(302).putHeader("Location", "/").end();
+        });
+
         AuthProvider authProvider = ChainAuth.create();
         AuthHandler basicAuthHandler = BasicAuthHandler.create(authProvider);
         router.route("/private/*").handler(basicAuthHandler);
@@ -78,6 +83,13 @@ public class RestApiVerticle extends AbstractVerticle {
             ctx.response().end(new JsonObject().put("rs", new Date().toString()).encodePrettily());
         });
 
+        // 如果您需要在一个阻塞处理器中处理一个 multipart 类型的表单数据，您需要首先使用一个非阻塞的处理器来调用 setExpectMultipart(true)
+        router.post("/some/longtime/endpoint").handler(ctx -> {
+            ctx.request().setExpectMultipart(true);
+            ctx.next();
+        }).blockingHandler(ctx -> {
+            // 执行某些阻塞操作
+        });
     }
 
     @BBRouter(path = "/catalogue/products/:producttype/:productid", httpMethod = HttpMethod.GET)
@@ -91,8 +103,8 @@ public class RestApiVerticle extends AbstractVerticle {
         ctx.response()
                 .putHeader("content-type", "application/json;charset=UTF-8")
                 .end(new JsonObject()
-                .put("now", new Date().toString())
-                .put("producttype", productType)
-                .put("productid", productID).encodePrettily());
+                        .put("now", new Date().toString())
+                        .put("producttype", productType)
+                        .put("productid", productID).encodePrettily());
     }
 }

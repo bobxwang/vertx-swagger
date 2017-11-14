@@ -18,9 +18,38 @@
             <groupId>org.bob.vertx</groupId>
             <artifactId>vertx-swagger</artifactId>
         </dependency>
+
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-jdbc-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-service-proxy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-codegen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-auth-jwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-reactive-streams</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-rx-java2</artifactId>
         </dependency>
 
         <dependency>
@@ -84,18 +113,39 @@
             </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-        </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <useIncrementalCompilation>false</useIncrementalCompilation>
+                    <annotationProcessors>
+                        <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
+                    </annotationProcessors>
+                    <generatedSourcesDirectory>${project.basedir}/src/main/generated</generatedSourcesDirectory>
+                    <compilerArgs>
+                        <arg>-AoutputDirectory=${project.basedir}/src/main</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${project.basedir}/src/main/generated</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -105,8 +155,24 @@
                         <configuration>
                             <transformers>
                                 <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.handlers</resource>
+                                </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/spring.schemas</resource>
+                                </transformer>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>META-INF/services/io.vertx.core.spi.VerticleFactory</resource>
+                                </transformer>
+                                <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.bob.vertx.webapi.Application</mainClass>
+                                    <manifestEntries>
+                                        <Main-Class>com.bob.vertx.webapi.Application</Main-Class>
+                                        <X-Compile-Source-JDK>${java.version}</X-Compile-Source-JDK>
+                                        <X-Compile-Target-JDK>${java.version}</X-Compile-Target-JDK>
+                                    </manifestEntries>
                                 </transformer>
                             </transformers>
                         </configuration>

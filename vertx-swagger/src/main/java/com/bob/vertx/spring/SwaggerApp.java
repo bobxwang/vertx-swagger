@@ -8,13 +8,19 @@ import com.google.common.collect.Sets;
 import io.swagger.models.Info;
 import io.swagger.models.Swagger;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Handler;
 import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.eventbus.SendContext;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.impl.FileResolver;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -28,8 +34,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.core.env.Environment;
 import org.springframework.util.ReflectionUtils;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -51,8 +59,31 @@ public final class SwaggerApp {
         final Environment environment = applicationContext.getBean(Environment.class);
 
         final Vertx vertx = applicationContext.getBean(Vertx.class);
+        vertx.eventBus().addInterceptor(event -> {
+            Message message = event.message();
+            logger.info(message);
+            // 拦截所有消息
+            event.next();
+        });
         final SpringVerticleFactory verticleFactory = new SpringVerticleFactory();
         vertx.registerVerticleFactory(verticleFactory);
+
+        FileResolver fileResolver = new FileResolver(vertx);
+        File file = fileResolver.resolveFile("webjars/bycdao-ui/cdao/DUI.js");
+        if (file != null) {
+            System.out.println(file.getAbsoluteFile());
+        } else {
+            System.out.println("null");
+        }
+
+        vertx.setPeriodic(1000, id -> {
+            // This handler will get called every second
+            System.out.println("timer fired!" + new Date().toString());
+        });
+        vertx.setTimer(1000, id -> {
+            // this handler will called after one second, just once
+            System.out.println("And one second later this is printed");
+        });
 
         try {
             applicationContext.getBean(Router.class);
@@ -70,7 +101,7 @@ public final class SwaggerApp {
         configRouter(vertx, router, environment);
 
         Map<String, Verticle> maps = applicationContext.getBeansOfType(Verticle.class);
-        DeploymentOptions options = new DeploymentOptions().setInstances(4).setWorker(true);
+        DeploymentOptions options = new DeploymentOptions().setInstances(1).setWorker(true);
         for (Map.Entry<String, Verticle> temp : maps.entrySet()) {
             Verticle verticle = temp.getValue();
             String name = verticle.getClass().getSimpleName().substring(0, 1).toLowerCase() + verticle.getClass().getSimpleName().substring(1);
@@ -96,7 +127,9 @@ public final class SwaggerApp {
             }
         }
 
-        HttpServer httpServer = vertx.createHttpServer();
+        HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions()
+                .setSsl(false)
+                .setKeyStoreOptions(new JksOptions().setPath("server-keystore.jks").setPassword("secret")));
         httpServer.requestHandler(router::accept);
         int port;
         try {
@@ -181,6 +214,13 @@ public final class SwaggerApp {
         Router swaggerRouter = Router.router(vertx);
         router.mountSubRouter("/swagger", swaggerRouter);
         swaggerRouter.get("/definition.json").handler(ctx -> {
+            ctx.response()
+                    .putHeader("content-type", "application/json;charset=UTF-8")
+                    .end(Json.encodePrettily(swagger));
+        });
+        Router sRouter = Router.router(vertx);
+        router.mountSubRouter("/v2", sRouter);
+        sRouter.get("/api-docs").handler(ctx -> {
             ctx.response()
                     .putHeader("content-type", "application/json;charset=UTF-8")
                     .end(Json.encodePrettily(swagger));

@@ -86,29 +86,25 @@
         })
         window.ui = ui;
 
-        var x = document.getElementsByClassName("download-url-wrapper");
-        if (x) {
-            x[0].style.display = "none";
-        }
-        setTimeout(setNone, 250)
+//        var x = document.getElementsByClassName("download-url-wrapper");
+//        if (x) {
+//            x[0].style.display = "none";
+//        }
+//        setTimeout(setNone, 250)
     }
-    function setNone() {
-        var y = document.getElementsByClassName("main");
-        if (!y) {
-            setTimeout(setNone, 250);
-            return;
-        }
-        if (y) {
-            var ay = y[0].getElementsByTagName("a");
-            if (ay) {
-                ay[0].style.display = "none"
-            }
-        }
-        var xy = document.getElementsByClassName("description");
-        if (xy) {
-            xy[0].style.display = "none"
-        }
-    }
+//    function setNone() {
+//        var y = document.getElementsByClassName("main");
+//        if (y) {
+//            var ay = y[0].getElementsByTagName("a");
+//            if (ay) {
+//                ay[0].style.display = "none"
+//            }
+//        }
+//        var xy = document.getElementsByClassName("description");
+//        if (xy) {
+//            xy[0].style.display = "none"
+//        }
+//    }
 </script>
 </body>
 </html>

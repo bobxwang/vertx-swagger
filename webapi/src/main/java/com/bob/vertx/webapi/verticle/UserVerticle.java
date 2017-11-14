@@ -56,7 +56,7 @@ public class UserVerticle extends AbstractVerticle {
         logger.info(Thread.currentThread().getName());
         String name = ctx.request().getParam("name");
         if (Strings.isNullOrEmpty(name)) {
-            name = "微贷";
+            name = "fuck-u";
         }
         ctx.response().putHeader("content-type", "application/json;charset=UTF-8")
                 .end(new JsonObject()

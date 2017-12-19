@@ -76,7 +76,6 @@ public class Application {
         System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory");
         System.setProperty("hsqldb.reconfig_logging", "false");
 
-
         ApplicationContext applicationContext = SwaggerApp.Run(SpringConfig.class);
         final ObjectMapper objectMapper = applicationContext.getBean(ObjectMapper.class);
         final Router router = applicationContext.getBean(Router.class);
@@ -87,7 +86,7 @@ public class Application {
             Map<String, String> map = new HashMap<>();
             map.put("error", "Sorry! Not today");
             map.put("status", String.valueOf(statusCode));
-            map.put("path", frc.currentRoute().getPath());
+            map.put("path", frc.request().path());
             map.put("msg", frc.failure() == null ? "" : frc.failure().getMessage());
             String rs = "{}";
             try {

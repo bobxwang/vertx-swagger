@@ -14,9 +14,9 @@ import java.util.Date;
 /**
  * Created by wangxiang on 17/10/26.
  */
-public class DatabaseVerticle extends AbstractVerticle {
+public class WorkVerticle extends AbstractVerticle {
 
-    private Logger logger = LoggerFactory.getLogger(DatabaseVerticle.class);
+    private Logger logger = LoggerFactory.getLogger(WorkVerticle.class);
 
     private String wikiDbQueue = "wikidb.queue";
 

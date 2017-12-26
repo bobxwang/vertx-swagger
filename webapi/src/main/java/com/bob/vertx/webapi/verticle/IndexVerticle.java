@@ -75,7 +75,7 @@ public class IndexVerticle extends AbstractVerticle {
         );
 
         Future<String> dbVerticle = Future.future();
-        vertx.deployVerticle(new DatabaseVerticle(), dbVerticle.completer());
+        vertx.deployVerticle(new WorkVerticle(), dbVerticle.completer());
         dbVerticle.setHandler(ar -> {
             if (ar.succeeded()) {
                 startFuture.complete();

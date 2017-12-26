@@ -25,7 +25,7 @@ public class DatabaseVerticleTest {
     public void prepare(TestContext context) throws InterruptedException {
 
         vertx = Vertx.vertx();
-        vertx.deployVerticle(new DatabaseVerticle(), context.asyncAssertSuccess(id -> {
+        vertx.deployVerticle(new WorkVerticle(), context.asyncAssertSuccess(id -> {
             databaseService = DatabaseService.createProxy(vertx, wikiDbQueue);
         }));
     }

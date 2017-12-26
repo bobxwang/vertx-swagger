@@ -8,15 +8,12 @@ import com.google.common.collect.Sets;
 import io.swagger.models.Info;
 import io.swagger.models.Swagger;
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Handler;
 import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.eventbus.SendContext;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.impl.FileResolver;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -34,10 +31,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.core.env.Environment;
 import org.springframework.util.ReflectionUtils;
 
-import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Map;
 
 /**
@@ -67,23 +62,6 @@ public final class SwaggerApp {
         });
         final SpringVerticleFactory verticleFactory = new SpringVerticleFactory();
         vertx.registerVerticleFactory(verticleFactory);
-
-        FileResolver fileResolver = new FileResolver(vertx);
-        File file = fileResolver.resolveFile("webjars/bycdao-ui/cdao/DUI.js");
-        if (file != null) {
-            System.out.println(file.getAbsoluteFile());
-        } else {
-            System.out.println("null");
-        }
-
-        vertx.setPeriodic(1000, id -> {
-            // This handler will get called every second
-            System.out.println("timer fired!" + new Date().toString());
-        });
-        vertx.setTimer(1000, id -> {
-            // this handler will called after one second, just once
-            System.out.println("And one second later this is printed");
-        });
 
         try {
             applicationContext.getBean(Router.class);
@@ -148,7 +126,7 @@ public final class SwaggerApp {
         return applicationContext;
     }
 
-    private static void initSwagger(final Environment environment) {
+    private synchronized static void initSwagger(final Environment environment) {
         if (swagger == null) {
             swagger = new Swagger();
             swagger.setSwagger("2.0");

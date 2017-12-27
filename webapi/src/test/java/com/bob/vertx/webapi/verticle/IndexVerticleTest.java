@@ -2,6 +2,7 @@ package com.bob.vertx.webapi.verticle;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -22,7 +23,10 @@ public class IndexVerticleTest {
 
         Async async = context.async();
 
-        final Vertx vertx = Vertx.vertx();
+        VertxOptions vertxOptions = new VertxOptions();
+        vertxOptions.setMaxEventLoopExecuteTime(Long.MAX_VALUE);
+        vertxOptions.setMaxWorkerExecuteTime(Long.MAX_VALUE);
+        final Vertx vertx = Vertx.vertx(vertxOptions);
         vertx.createHttpServer().requestHandler(req ->
                 req.response()
                         .putHeader("Content-Type", "text/plain")

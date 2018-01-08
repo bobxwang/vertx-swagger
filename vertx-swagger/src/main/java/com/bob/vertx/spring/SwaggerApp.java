@@ -54,12 +54,6 @@ public final class SwaggerApp {
         final Environment environment = applicationContext.getBean(Environment.class);
 
         final Vertx vertx = applicationContext.getBean(Vertx.class);
-        vertx.eventBus().addInterceptor(event -> {
-            Message message = event.message();
-            logger.info(message);
-            // 拦截所有消息
-            event.next();
-        });
         final SpringVerticleFactory verticleFactory = new SpringVerticleFactory();
         vertx.registerVerticleFactory(verticleFactory);
 
@@ -177,8 +171,7 @@ public final class SwaggerApp {
             value = environment.getProperty("server.maxageseconds");
             if (!Strings.isNullOrEmpty(value)) {
                 try {
-                    Integer i = Integer.valueOf(value);
-                    corsHandler.maxAgeSeconds(i);
+                    corsHandler.maxAgeSeconds(Integer.valueOf(value));
                 } catch (NumberFormatException e) {
                     logger.warn("server.maxageseconds值请配置成整数" + e.getMessage(), e);
                 }
@@ -198,19 +191,16 @@ public final class SwaggerApp {
         });
         Router sRouter = Router.router(vertx);
         router.mountSubRouter("/v2", sRouter);
-        sRouter.get("/api-docs").handler(ctx -> {
-            ctx.response()
-                    .putHeader("content-type", "application/json;charset=UTF-8")
-                    .end(Json.encodePrettily(swagger));
-        });
+        sRouter.get("/api-docs").handler(ctx ->
+                ctx.response()
+                        .putHeader("content-type", "application/json;charset=UTF-8")
+                        .end(Json.encodePrettily(swagger))
+        );
     }
 
     private static void configCorsAllowedMethod(CorsHandler corsHandler, String method) {
-        String m = method.toUpperCase();
-
         try {
-            HttpMethod httpMethod = HttpMethod.valueOf(m);
-            corsHandler.allowedMethod(httpMethod);
+            corsHandler.allowedMethod(HttpMethod.valueOf(method.toUpperCase()));
         } catch (Exception e) {
             logger.warn(method + e.getMessage(), e);
         }

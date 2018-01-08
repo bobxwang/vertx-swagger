@@ -5,8 +5,11 @@ import com.bob.vertx.webapi.config.SpringConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.impl.FileResolver;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import org.springframework.context.ApplicationContext;
 
@@ -20,6 +23,8 @@ import java.util.Map;
  * Created by wangxiang on 17/9/1.
  */
 public class Application {
+
+    private static Logger logger = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) throws IOException {
 
@@ -69,6 +74,13 @@ public class Application {
         vertx.setTimer(1000, id -> {
             // this handler will called after one second, just once
             System.out.println("And one second later this is printed");
+        });
+
+        // 拦截所有消息
+        vertx.eventBus().addInterceptor(event -> {
+            Message message = event.message();
+            logger.info(message);
+            event.next();
         });
 
         FileResolver fileResolver = new FileResolver(vertx);
